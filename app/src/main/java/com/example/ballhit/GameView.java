@@ -33,7 +33,7 @@ public class GameView extends View  {
     float paddleX, paddleY; // X and Y coordinates of the paddle
     float oldX, oldPaddleX; // Old X coordinates of the paddle
     int points = 0; // Player's points
-    int goalPionts = 30;
+    int goalPoints = 30;
     int turn = 0;
     int life = 3; // Player's remaining life
     Bitmap ball, paddle; // Bitmap images for ball and paddle
@@ -235,9 +235,11 @@ public class GameView extends View  {
     }
 
     private void endTurn(){
-        if (points >= goalPionts){
+        if (points >= goalPoints){
             Intent intent = new Intent(context, GamePlay.class);
             intent.putExtra("points", points);
+            intent.putExtra("goalPoints", goalPoints);
+            intent.putExtra("turn", turn);
             context.startActivity(intent);
             ((Activity)context).finish();
         }else{

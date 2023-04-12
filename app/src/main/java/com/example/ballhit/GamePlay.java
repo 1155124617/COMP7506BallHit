@@ -30,12 +30,12 @@ public class GamePlay extends AppCompatActivity {
         gameView = findViewById(R.id.gameview);
         if (getIntent().getExtras() != null) {
             gameView.points = getIntent().getExtras().getInt("points");
-            gameView.turn = gameView.turn + 1;
-            gameView.goalPionts = gameView.goalPionts + 30*(int)(gameView.turn*0.1+1);
+            gameView.turn = getIntent() .getExtras().getInt("turn")+ 1;
+            gameView.goalPoints = getIntent().getExtras().getInt("goalPoints") + (int)(30*(gameView.turn*0.5+1));
         }
         tvGoalPoints = findViewById(R.id.goalPoints);
         tvTurn = findViewById(R.id.turn);
-        tvGoalPoints.append(""+gameView.goalPionts);
+        tvGoalPoints.append(""+gameView.goalPoints);
         tvTurn.append(""+gameView.turn);
     }
 

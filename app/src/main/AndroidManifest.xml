@@ -22,6 +22,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".LoginokActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name=".GamePlay"
             android:exported="true"
             android:screenOrientation="portrait">

@@ -8,13 +8,50 @@
     android:background="#E1F5FE"
     android:orientation="vertical"
     android:gravity="center">
-    <ImageView
-        android:id="@+id/optionIcon"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/option"
-        android:onClick="showOverlay"
-        android:clickable="true" />
+        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/turn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/holo_green_dark"
+                android:text="Turn: "
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/goalPoints"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/holo_green_dark"
+                android:gravity="center"
+                android:text="Goal Points: "
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/optionIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/option"
+            android:onClick="showOverlay"
+            android:scaleType="fitEnd"
+            android:clickable="true" />
+
+
+    </LinearLayout>
+
     <com.example.ballhit.GameView
         android:id="@+id/gameview"
         android:layout_width="wrap_content"

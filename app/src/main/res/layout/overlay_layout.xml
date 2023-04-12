@@ -9,8 +9,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Resume"
-        android:onClick="onOptionButtonClick" />
+        android:onClick="onOptionButtonClick"
+        android:text="Resume" />
 
     <Button
         android:id="@+id/exit"

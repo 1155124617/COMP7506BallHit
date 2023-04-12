@@ -1,5 +1,6 @@
 package com.example.ballhit;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,15 +17,26 @@ import androidx.appcompat.app.AppCompatActivity;
 public class GamePlay extends AppCompatActivity {
     private PopupWindow popupWindow;
     private GameView gameView;
+    TextView tvGoalPoints;
+    TextView tvTurn;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.game_play);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         gameView = findViewById(R.id.gameview);
+        if (getIntent().getExtras() != null) {
+            gameView.points = getIntent().getExtras().getInt("points");
+            gameView.turn = gameView.turn + 1;
+            gameView.goalPionts = gameView.goalPionts + 30*(int)(gameView.turn*0.1+1);
+        }
+        tvGoalPoints = findViewById(R.id.goalPoints);
+        tvTurn = findViewById(R.id.turn);
+        tvGoalPoints.append(""+gameView.goalPionts);
+        tvTurn.append(""+gameView.turn);
     }
 
     public void showOverlay(View view) {

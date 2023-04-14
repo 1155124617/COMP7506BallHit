@@ -35,6 +35,8 @@ public class GameView extends View  {
     int points = 0; // Player's points
     int goalPoints = 30;
     int turn = 0;
+    int lifePlus=0;
+    int timePlus=0;
     int life = 3; // Player's remaining life
     Bitmap ball, paddle; // Bitmap images for ball and paddle
     int dWidth, dHeight; // Width and height of the screen
@@ -45,7 +47,7 @@ public class GameView extends View  {
     int numBricks = 0; // Number of bricks
     int brokenBricks = 0; // Number of broken bricks
     boolean gameOver = false; // Flag to indicate if game is over
-    private CountDownTimerFactory.CountDownTimerExt countDownTimer; // Countdown timer for game duration
+    CountDownTimerFactory.CountDownTimerExt countDownTimer; // Countdown timer for game duration
     private boolean stopGame;
 
     public GameView(Context context, AttributeSet attributeSet) {
@@ -236,10 +238,12 @@ public class GameView extends View  {
 
     private void endTurn(){
         if (points >= goalPoints){
-            Intent intent = new Intent(context, GamePlay.class);
+            Intent intent = new Intent(context, Store.class);
             intent.putExtra("points", points);
             intent.putExtra("goalPoints", goalPoints);
             intent.putExtra("turn", turn);
+            intent.putExtra("lifePlus", lifePlus);
+            intent.putExtra("timePlus", timePlus);
             context.startActivity(intent);
             ((Activity)context).finish();
         }else{

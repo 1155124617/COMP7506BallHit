@@ -91,6 +91,9 @@ public class GamePlay extends AppCompatActivity {
     }
 
     public void lifePlus(View view){
+        if (gameView.life==3){
+            return;
+        }
         gameView.life+=1;
         gameView.lifePlus-=1;
         if (gameView.lifePlus==0){
@@ -104,6 +107,7 @@ public class GamePlay extends AppCompatActivity {
 
     public void timePlus(View view){
         gameView.timePlus-=1;
+        //todo: time +10s
         if (gameView.timePlus==0){
             ibTimePlus.setClickable(false);
             ibTimePlus.setImageResource(R.drawable.time_plus_disable);

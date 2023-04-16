@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             finish();//结束一个Activity
         }
     }
-    private class  RegListenerimp implements View.OnClickListener {
+    private class RegListenerimp implements View.OnClickListener {
 
         @Override
         public void onClick(View v) {

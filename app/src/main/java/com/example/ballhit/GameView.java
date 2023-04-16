@@ -173,6 +173,9 @@ public class GameView extends View  {
         }
         canvas.drawText("" + points, 20, TEXT_SIZE, textPaint);
         canvas.drawText(countdownText, (getWidth() - countdownTextSize) / 2f, textPaint.getTextSize(), textPaint);
+        if (life == 3) {
+            healthPaint.setColor(Color.GREEN);
+        }
         if (life == 2) {
             healthPaint.setColor(Color.YELLOW);
         } else if (life == 1) {
@@ -267,14 +270,21 @@ public class GameView extends View  {
 
     public void stopGame() {
         stopGame = true;
-        long remaingTime = countDownTimer.remainingTime;
+        long remainingTime = countDownTimer.remainingTime;
         countDownTimer.cancel();
-        countDownTimer = CountDownTimerFactory.getInstance(remaingTime);
+        countDownTimer = CountDownTimerFactory.getInstance(remainingTime);
     }
 
     public void resumeGame() {
         stopGame = false;
         countDownTimer.start();
         invalidate();
+    }
+
+    public void addTimeCountDown(long addTime) {
+        long remainingTime = countDownTimer.remainingTime;
+        countDownTimer.cancel();
+        countDownTimer = CountDownTimerFactory.getInstance(remainingTime + addTime);
+        countDownTimer.start();
     }
 }

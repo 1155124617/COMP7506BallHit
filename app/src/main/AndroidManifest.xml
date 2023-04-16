@@ -32,6 +32,11 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name=".Store"
+            android:exported="true"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name=".GameOver"
             android:exported="true"
             android:screenOrientation="portrait">

@@ -166,39 +166,7 @@ public class GameView extends View  {
 
         ballX += velocity.getX();
         ballY += velocity.getY();
-        if (ballX <= 0 && touchedBorder != Border.LEFT) {
-            lastVisitedBrick = null;
-            touchedBorder = Border.LEFT;
-            velocity.setX(velocity.getX() * -1);
-
-        }
-        if (ballX >= dWidth - ballWidth && touchedBorder != Border.RIGHT) {
-            lastVisitedBrick = null;
-            touchedBorder = Border.RIGHT;
-            velocity.setX(velocity.getX() * -1);
-        }
-        if (ballY <= 0 && touchedBorder != Border.TOP) {
-            lastVisitedBrick = null;
-            touchedBorder = Border.TOP;
-            velocity.setY(velocity.getY() * -1);
-        }
-        if (ballY > (dHeight * 4) / 5 + paddle.getHeight()) {
-            lastVisitedBrick = null;
-            touchedBorder = null;
-
-            ballX = 1 + random.nextInt(dWidth - ballWidth - 1);
-            ballY = dHeight / 3;
-            if (mpMiss != null) {
-                mpMiss.start();
-            }
-            velocity.setX(xVelocity());
-            velocity.setY(32);
-            life--;
-            if (life == 0) {
-                gameOver = true;
-                endTurn();
-            }
-        }
+        interactBorder();
         if (velocity.getY() >= 0) {
             // Only when the ball falls down to the paddle, the collision will be included
             // Fix the bug that the ball bounces within paddle boundary
@@ -264,6 +232,42 @@ public class GameView extends View  {
         }
         if (!gameOver && !stopGame) {
             delayedThreadExec.postDelayed(refreshThread, UPDATE_MILLIS);
+        }
+    }
+
+    private void interactBorder() {
+        if (ballX <= 0 && touchedBorder != Border.LEFT) {
+            lastVisitedBrick = null;
+            touchedBorder = Border.LEFT;
+            velocity.setX(velocity.getX() * -1);
+
+        }
+        if (ballX >= dWidth - ballWidth && touchedBorder != Border.RIGHT) {
+            lastVisitedBrick = null;
+            touchedBorder = Border.RIGHT;
+            velocity.setX(velocity.getX() * -1);
+        }
+        if (ballY <= 0 && touchedBorder != Border.TOP) {
+            lastVisitedBrick = null;
+            touchedBorder = Border.TOP;
+            velocity.setY(velocity.getY() * -1);
+        }
+        if (ballY > (dHeight * 4) / 5 + paddle.getHeight()) {
+            lastVisitedBrick = null;
+            touchedBorder = null;
+
+            ballX = 1 + random.nextInt(dWidth - ballWidth - 1);
+            ballY = dHeight / 3;
+            if (mpMiss != null) {
+                mpMiss.start();
+            }
+            velocity.setX(xVelocity());
+            velocity.setY(32);
+            life--;
+            if (life == 0) {
+                gameOver = true;
+                endTurn();
+            }
         }
     }
 

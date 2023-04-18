@@ -107,7 +107,6 @@ public class GamePlay extends AppCompatActivity {
 
     public void timePlus(View view){
         gameView.timePlus-=1;
-        //todo: time +10s
         gameView.addTimeCountDown(10000);
         if (gameView.timePlus==0){
             ibTimePlus.setClickable(false);

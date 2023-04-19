@@ -13,8 +13,12 @@ import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -46,6 +50,9 @@ public class GameView extends View  {
     int goalPoints = 30;
     int turn = 0;
     int lifePlus=0;
+    int bomb;
+    boolean setBomb =false;
+    BombRange bombRange;
     int timePlus=0;
     int life = 3; // Player's remaining life
     Bitmap ball, paddle; // Bitmap images for ball and paddle
@@ -213,6 +220,10 @@ public class GameView extends View  {
                     touchedBorder = null;
                     mpBreak.start();
                     velocity = brick.velocityAfterCollision(velocity, ballX + ballWidth/2, ballY + ballHeight/2);
+                    if (setBomb){
+                        setBomb=false;
+                        bombRange = new BombRange(brick.left-dWidth/8, brick.right+dWidth/8, brick.top-dHeight/16, brick.bottom+dHeight/16);
+                    }
                     if (!(brick instanceof Wall)) {
                         brick.setInVisible();
                         points += 10;
@@ -225,11 +236,31 @@ public class GameView extends View  {
                 }
             }
         }
+        for (Brick brick : bricks){
+            if (brick!=null && bombRange!=null && brick.getVisibility() && bombRange.containBrick(brick)){
+                brick.setInVisible();
+                points += 10;
+                if (!(brick instanceof Wall)) {
+                    brokenBricks++;
+                }
+            }
+        }
+        bombRange=null;
 
         if (brokenBricks == numBricks) {
             // All blocks are eliminated
             gameOver = true;
+            points+=100;
+            Toast toast=Toast.makeText(context, "Congratulations! \nYou have cleaned all bricks.\npoints +100", Toast.LENGTH_LONG);
+//            ImageView myImage = new ImageView(context);
+//            myImage.setImageResource(R.drawable.congratulation);
+//            LinearLayout toastView = (LinearLayout)toast.getView();
+//            toastView.setOrientation(LinearLayout.HORIZONTAL);
+//            toastView.addView(myImage,0);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
         }
+
         if (!gameOver && !stopGame) {
             delayedThreadExec.postDelayed(refreshThread, UPDATE_MILLIS);
         }
@@ -299,6 +330,7 @@ public class GameView extends View  {
             intent.putExtra("turn", turn);
             intent.putExtra("lifePlus", lifePlus);
             intent.putExtra("timePlus", timePlus);
+            intent.putExtra("bomb", bomb);
             context.startActivity(intent);
             ((Activity)context).finish();
         }else{

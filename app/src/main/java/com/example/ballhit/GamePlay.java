@@ -1,6 +1,5 @@
 package com.example.ballhit;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -18,8 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 public class GamePlay extends AppCompatActivity {
     private PopupWindow popupWindow;
     private GameView gameView;
-    TextView tvGoalPoints, tvTurn, tvLifePlusNum, tvTimePlusNum;
-    ImageButton ibLifePlus, ibTimePlus;
+    TextView tvGoalPoints, tvTurn, tvLifePlusNum, tvTimePlusNum, tvBombNum;
+    ImageButton ibLifePlus, ibTimePlus, ibBomb;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,6 +33,7 @@ public class GamePlay extends AppCompatActivity {
             gameView.goalPoints = getIntent().getExtras().getInt("goalPoints") + (int)(30*(gameView.turn*0.5+1));
             gameView.timePlus=getIntent().getExtras().getInt("timePlus");
             gameView.lifePlus=getIntent().getExtras().getInt("lifePlus");
+            gameView.bomb=getIntent().getExtras().getInt("bomb");
         }
         tvGoalPoints = findViewById(R.id.goalPoints);
         tvTurn = findViewById(R.id.turn);
@@ -42,8 +42,10 @@ public class GamePlay extends AppCompatActivity {
 
         ibLifePlus=findViewById(R.id.lifePlus);
         ibTimePlus=findViewById(R.id.timePlus);
+        ibBomb=findViewById(R.id.bomb);
         tvLifePlusNum=findViewById(R.id.lifePlusNum);
         tvTimePlusNum=findViewById(R.id.timePlusNum);
+        tvBombNum=findViewById(R.id.bombNum);
         if(gameView.timePlus==0){
             ibTimePlus.setClickable(false);
             ibTimePlus.setImageResource(R.drawable.time_plus_disable);
@@ -59,6 +61,14 @@ public class GamePlay extends AppCompatActivity {
             tvLifePlusNum.setText("×"+gameView.lifePlus);
             ibLifePlus.setClickable(true);
             ibLifePlus.setImageResource(R.drawable.life_plus);
+        }
+        if(gameView.bomb==0){
+            ibBomb.setClickable(false);
+            ibBomb.setImageResource(R.drawable.bomb_disable);
+        }else{
+            tvBombNum.setText("×"+gameView.bomb);
+            ibBomb.setClickable(true);
+            ibBomb.setImageResource(R.drawable.bomb);
         }
     }
 
@@ -114,6 +124,18 @@ public class GamePlay extends AppCompatActivity {
             tvTimePlusNum.setText("");
         }else{
             tvTimePlusNum.setText("×"+gameView.timePlus);
+        }
+    }
+
+    public void bomb(View view){
+        gameView.bomb-=1;
+        gameView.setBomb =true;
+        if (gameView.bomb==0){
+            ibBomb.setClickable(false);
+            ibBomb.setImageResource(R.drawable.bomb_disable);
+            tvBombNum.setText("");
+        }else{
+            tvBombNum.setText("×"+gameView.bomb);
         }
     }
 

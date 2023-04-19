@@ -90,6 +90,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/bomb"
+                android:scaleType="fitXY"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:onClick="bomb"/>
+            <TextView
+                android:id="@+id/bombNum"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
 
 
     </LinearLayout>

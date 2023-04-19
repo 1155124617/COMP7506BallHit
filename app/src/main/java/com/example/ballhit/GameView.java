@@ -13,8 +13,10 @@ import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -46,6 +48,9 @@ public class GameView extends View  {
     int goalPoints = 30;
     int turn = 0;
     int lifePlus=0;
+    int bomb;
+    boolean setBomb =false;
+    BombRange bombRange;
     int timePlus=0;
     int life = 3; // Player's remaining life
     Bitmap ball, paddle; // Bitmap images for ball and paddle
@@ -207,12 +212,24 @@ public class GameView extends View  {
         }
         canvas.drawRect(dWidth-200, 30, dWidth - 200 + 60 * life, 80 ,healthPaint);
         for (Brick brick : bricks) {
+            if(brick!=null && bombRange!=null && bombRange.containBrick(brick)){
+                brick.setInVisible();
+                points += 10;
+                brokenBricks++;
+            }
             if (brick != null && (lastVisitedBrick != brick) && brick.collision(ballX, ballX + ballWidth, ballY, ballY + ballHeight)) {
                 if (mpBreak != null) {
                     lastVisitedBrick = brick;
                     touchedBorder = null;
                     mpBreak.start();
                     velocity = brick.velocityAfterCollision(velocity, ballX + ballWidth/2, ballY + ballHeight/2);
+                    if (setBomb){
+                        brick.setInVisible();
+                        points += 10;
+                        brokenBricks++;
+                        setBomb=false;
+                        bombRange = new BombRange(brick.left-dWidth/8, brick.right+dWidth/8, brick.top-dHeight/16, brick.bottom+dHeight/16);
+                    }
                     if (!(brick instanceof Wall)) {
                         brick.setInVisible();
                         points += 10;
@@ -230,6 +247,7 @@ public class GameView extends View  {
             // All blocks are eliminated
             gameOver = true;
         }
+
         if (!gameOver && !stopGame) {
             delayedThreadExec.postDelayed(refreshThread, UPDATE_MILLIS);
         }

@@ -10,6 +10,6 @@ public class BombRange {
     }
 
     public boolean containBrick(Brick brick){
-        return brick.right<=this.left && brick.left>=this.left && brick.bottom<=this.bottom && brick.top>=this.top;
+        return brick.right<=this.right && brick.left>=this.left && brick.bottom<=this.bottom && brick.top>=this.top;
     }
 }

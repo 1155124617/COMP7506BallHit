@@ -215,7 +215,9 @@ public class GameView extends View  {
             if(brick!=null && bombRange!=null && bombRange.containBrick(brick)){
                 brick.setInVisible();
                 points += 10;
+                if (!(brick instanceof Wall)) {
                 brokenBricks++;
+                }
             }
             if (brick != null && (lastVisitedBrick != brick) && brick.collision(ballX, ballX + ballWidth, ballY, ballY + ballHeight)) {
                 if (mpBreak != null) {
@@ -226,7 +228,9 @@ public class GameView extends View  {
                     if (setBomb){
                         brick.setInVisible();
                         points += 10;
-                        brokenBricks++;
+                        if (!(brick instanceof Wall)){
+                            brokenBricks++;
+                        }
                         setBomb=false;
                         bombRange = new BombRange(brick.left-dWidth/8, brick.right+dWidth/8, brick.top-dHeight/16, brick.bottom+dHeight/16);
                     }
@@ -242,10 +246,15 @@ public class GameView extends View  {
                 }
             }
         }
+        bombRange=null;
+
 
         if (brokenBricks == numBricks) {
             // All blocks are eliminated
             gameOver = true;
+            Toast toast=Toast.makeText(context, "Congratulations! \nYou have cleaned all bricks.\npoints +100", Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
         }
 
         if (!gameOver && !stopGame) {

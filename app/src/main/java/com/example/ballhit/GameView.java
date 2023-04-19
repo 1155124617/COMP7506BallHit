@@ -16,6 +16,8 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.HashSet;
@@ -248,7 +250,13 @@ public class GameView extends View  {
         if (brokenBricks == numBricks) {
             // All blocks are eliminated
             gameOver = true;
+            points+=100;
             Toast toast=Toast.makeText(context, "Congratulations! \nYou have cleaned all bricks.\npoints +100", Toast.LENGTH_LONG);
+//            ImageView myImage = new ImageView(context);
+//            myImage.setImageResource(R.drawable.congratulation);
+//            LinearLayout toastView = (LinearLayout)toast.getView();
+//            toastView.setOrientation(LinearLayout.HORIZONTAL);
+//            toastView.addView(myImage,0);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
         }
@@ -322,6 +330,7 @@ public class GameView extends View  {
             intent.putExtra("turn", turn);
             intent.putExtra("lifePlus", lifePlus);
             intent.putExtra("timePlus", timePlus);
+            intent.putExtra("bomb", bomb);
             context.startActivity(intent);
             ((Activity)context).finish();
         }else{

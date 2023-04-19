@@ -16,22 +16,32 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
+
+enum Border {
+    LEFT,
+    RIGHT,
+    TOP
+}
 
 public class GameView extends View  {
 
     Context context;
     float ballX, ballY;
     Velocity velocity = new Velocity(23, 32); // Velocity of the ball
-    Handler handler; // Delay UPDATE_MILLIS to run runnable thread
+    Handler delayedThreadExec; // Delay UPDATE_MILLIS to run runnable thread
     final long UPDATE_MILLIS = 30; // Control FPS, recommended 30 ms
-    Runnable runnable; // Background thread to call invalidate to call onDraw()
+    Runnable refreshThread; // Background thread to call invalidate to call onDraw()
     Paint textPaint = new Paint(); // Paint object for text rendering
     Paint healthPaint = new Paint(); // Paint object for health bar rendering
     Paint brickPaint = new Paint(); // Paint object for brick rendering
+    Paint wallPaint = new Paint(); // Paint object for wall rendering
     float TEXT_SIZE = 120; // Text size for countdown
     float paddleX, paddleY; // X and Y coordinates of the paddle
-    float oldX, oldPaddleX; // Old X coordinates of the paddle
+    float pressedX, pressedPaddleX, pressedY, pressedPaddleY; // Record press event position
+    Range paddleMoveRangeX, paddleMoveRangeY; // Define movement range of paddle
     int points = 0; // Player's points
     int goalPoints = 30;
     int turn = 0;
@@ -49,6 +59,8 @@ public class GameView extends View  {
     boolean gameOver = false; // Flag to indicate if game is over
     CountDownTimerFactory.CountDownTimerExt countDownTimer; // Countdown timer for game duration
     private boolean stopGame;
+    Brick lastVisitedBrick;
+    Border touchedBorder;
 
     public GameView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
@@ -63,8 +75,8 @@ public class GameView extends View  {
         this.context = context;
         ball = BitmapFactory.decodeResource(getResources(), R.drawable.ball);
         paddle = BitmapFactory.decodeResource(getResources(), R.drawable.paddle);
-        handler = new Handler();
-        runnable = new Runnable() {
+        delayedThreadExec = new Handler();
+        refreshThread = new Runnable() {
             @Override
             public void run() {
                 invalidate(); // Call onDraw() to redraw the view
@@ -78,6 +90,7 @@ public class GameView extends View  {
         textPaint.setTextAlign(Paint.Align.LEFT);
         healthPaint.setColor(Color.GREEN);
         brickPaint.setColor(Color.argb(255, 249, 129, 0));
+        wallPaint.setColor(Color.BLUE);
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -90,6 +103,8 @@ public class GameView extends View  {
         paddleX = dWidth / 2 - paddle.getWidth() / 2;
         ballWidth = ball.getWidth();
         ballHeight = ball.getHeight();
+        paddleMoveRangeX = new Range(0, dWidth - paddle.getWidth());
+        paddleMoveRangeY = new Range((dHeight * 3) / 5, (dHeight * 4) / 5);
         countDownTimer = CountDownTimerFactory.getInstance(60000);
         countDownTimer.start();
         stopGame = false;
@@ -99,11 +114,33 @@ public class GameView extends View  {
     private void createBricks() {
         int brickWidth = dWidth / 8;
         int brickHeight = dHeight / 16;
-        for (int column = 0 ; column < 8 ; column ++) {
-            for (int row = 0 ; row < 3 ; row++) {
-                bricks[numBricks] = new Brick(row, column, brickWidth, brickHeight);
-                numBricks++;
+        Set<Integer> distinctNumbers = new HashSet<>();
+        Random random = new Random();
+
+        // First row is full arranged with bricks
+        for (int column = 0 ; column < 8 ; column++) {
+            bricks[numBricks] = new Brick(0, column, brickWidth, brickHeight);
+            numBricks++;
+        }
+
+        // Other 14 is randomly allocated
+        for (; numBricks < 24 ; numBricks++) {
+            int randomPos = random.nextInt(32) + 8;
+            while (distinctNumbers.contains(randomPos)) {
+                randomPos = random.nextInt(32) + 8;
             }
+            distinctNumbers.add(randomPos);
+            bricks[numBricks] = new Brick(randomPos / 8, randomPos % 8, brickWidth, brickHeight);
+        }
+
+        // 5 bricks of wall
+        for (int i = 1 ; i <= 3 ; i++) {
+            int randomPos = random.nextInt(32) + 8;
+            while (distinctNumbers.contains(randomPos)) {
+                randomPos = random.nextInt(32) + 8;
+            }
+            distinctNumbers.add(randomPos);
+            bricks[numBricks + i] = new Wall(randomPos / 8, randomPos % 8, brickWidth, brickHeight);
         }
     }
 
@@ -129,27 +166,7 @@ public class GameView extends View  {
 
         ballX += velocity.getX();
         ballY += velocity.getY();
-        if ((ballX >= dWidth - ball.getWidth()) || ballX <= 0 ) {
-            velocity.setX(velocity.getX() * -1);
-
-        }
-        if (ballY <= 0) {
-            velocity.setY(velocity.getY() * -1);
-        }
-        if (ballY > paddleY + paddle.getHeight()) {
-            ballX = 1 + random.nextInt(dWidth - ball.getWidth() - 1);
-            ballY = dHeight / 3;
-            if (mpMiss != null) {
-                mpMiss.start();
-            }
-            velocity.setX(xVelocity());
-            velocity.setY(32);
-            life--;
-            if (life == 0) {
-                gameOver = true;
-                endTurn();
-            }
-        }
+        interactBorder();
         if (velocity.getY() >= 0) {
             // Only when the ball falls down to the paddle, the collision will be included
             // Fix the bug that the ball bounces within paddle boundary
@@ -160,15 +177,22 @@ public class GameView extends View  {
                 if (mpHit != null) {
                     mpHit.start();
                 }
-                velocity.setX(velocity.getX() + 1);
-                velocity.setY((velocity.getY() + 1) * -1);
+                lastVisitedBrick = null;
+                touchedBorder = null;
+
+                velocity.setY((velocity.getY()) * -1);
             }
         }
         canvas.drawBitmap(ball, ballX, ballY, null);
         canvas.drawBitmap(paddle, paddleX, paddleY, null);
-        for (int i = 0 ; i < numBricks ; i++) {
-            if (bricks[i].getVisibility()) {
-                canvas.drawRect(bricks[i].column * bricks[i].width + 1, bricks[i].row * bricks[i].height + 1, bricks[i].column * bricks[i].width + bricks[i].width - 1, bricks[i].row * bricks[i].height + bricks[i].height - 1, brickPaint);
+        for (Brick brick : bricks) {
+            if (brick != null && brick.getVisibility()) {
+                if (brick instanceof Wall) {
+                    canvas.drawRect(brick.left + 1, brick.top + 1, brick.right - 1, brick.bottom - 1, wallPaint);
+                }
+                else {
+                    canvas.drawRect(brick.left + 1, brick.top + 1, brick.right - 1, brick.bottom - 1, brickPaint);
+                }
             }
         }
         canvas.drawText("" + points, 20, TEXT_SIZE, textPaint);
@@ -182,19 +206,18 @@ public class GameView extends View  {
             healthPaint.setColor(Color.RED);
         }
         canvas.drawRect(dWidth-200, 30, dWidth - 200 + 60 * life, 80 ,healthPaint);
-        for (int i = 0 ; i < numBricks ; i++) {
-            if (bricks[i].getVisibility()) {
-                if (ballX + ballWidth >= bricks[i].column * bricks[i].width
-                && ballX <= bricks[i].column * bricks[i].width + bricks[i].width
-                && ballY <= bricks[i].row * bricks[i].height + bricks[i].height
-                && ballY >= bricks[i].row * bricks[i].height) {
-                    if (mpBreak != null) {
-                        mpBreak.start();
+        for (Brick brick : bricks) {
+            if (brick != null && (lastVisitedBrick != brick) && brick.collision(ballX, ballX + ballWidth, ballY, ballY + ballHeight)) {
+                if (mpBreak != null) {
+                    lastVisitedBrick = brick;
+                    touchedBorder = null;
+                    mpBreak.start();
+                    velocity = brick.velocityAfterCollision(velocity, ballX + ballWidth/2, ballY + ballHeight/2);
+                    if (!(brick instanceof Wall)) {
+                        brick.setInVisible();
+                        points += 10;
+                        brokenBricks++;
                     }
-                    velocity.setY((velocity.getY() + 1) * -1);
-                    bricks[i].setInVisible();
-                    points += 10;
-                    brokenBricks++;
                     if (brokenBricks == 24) {
                         endTurn();
                     }
@@ -208,32 +231,61 @@ public class GameView extends View  {
             gameOver = true;
         }
         if (!gameOver && !stopGame) {
-            handler.postDelayed(runnable, UPDATE_MILLIS);
+            delayedThreadExec.postDelayed(refreshThread, UPDATE_MILLIS);
+        }
+    }
+
+    private void interactBorder() {
+        if (ballX <= 0 && touchedBorder != Border.LEFT) {
+            lastVisitedBrick = null;
+            touchedBorder = Border.LEFT;
+            velocity.setX(velocity.getX() * -1);
+
+        }
+        if (ballX >= dWidth - ballWidth && touchedBorder != Border.RIGHT) {
+            lastVisitedBrick = null;
+            touchedBorder = Border.RIGHT;
+            velocity.setX(velocity.getX() * -1);
+        }
+        if (ballY <= 0 && touchedBorder != Border.TOP) {
+            lastVisitedBrick = null;
+            touchedBorder = Border.TOP;
+            velocity.setY(velocity.getY() * -1);
+        }
+        if (ballY > (dHeight * 4) / 5 + paddle.getHeight()) {
+            lastVisitedBrick = null;
+            touchedBorder = null;
+
+            ballX = 1 + random.nextInt(dWidth - ballWidth - 1);
+            ballY = dHeight / 3;
+            if (mpMiss != null) {
+                mpMiss.start();
+            }
+            velocity.setX(xVelocity());
+            velocity.setY(32);
+            life--;
+            if (life == 0) {
+                gameOver = true;
+                endTurn();
+            }
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float touchX = event.getX();
-        float touchY = event.getY();
-        if (touchY >= paddleY) {
+        if (event.getY() >= paddleY) {
             int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                oldX = event.getX();
-                oldPaddleX = paddleX;
+                pressedX = event.getX();
+                pressedY = event.getY();
+                pressedPaddleX = paddleX;
+                pressedPaddleY = paddleY;
             }
             if (action == MotionEvent.ACTION_MOVE) {
-                float shift = oldX - touchX;
-                float newPaddleX = oldPaddleX - shift;
-                if (newPaddleX <= 0) {
-                    paddleX = 0;
-                }
-                else if (newPaddleX >= dWidth - paddle.getWidth()) {
-                    paddleX = dWidth - paddle.getWidth();
-                }
-                else {
-                    paddleX = newPaddleX;
-                }
+                float shiftX = pressedX - event.getX();
+                float shiftY = pressedY - event.getY();
+                paddleX = paddleMoveRangeX.fitIn(pressedPaddleX - shiftX);
+                paddleY = paddleMoveRangeY.fitIn(pressedPaddleY - shiftY);
             }
         }
         return true;
@@ -255,7 +307,7 @@ public class GameView extends View  {
     }
 
     private void launchGameOver() {
-        handler.removeCallbacksAndMessages(null);
+        delayedThreadExec.removeCallbacksAndMessages(null);
         Intent intent = new Intent(context, GameOver.class);
         intent.putExtra("points", points);
         context.startActivity(intent);

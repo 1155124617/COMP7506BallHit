@@ -212,13 +212,6 @@ public class GameView extends View  {
         }
         canvas.drawRect(dWidth-200, 30, dWidth - 200 + 60 * life, 80 ,healthPaint);
         for (Brick brick : bricks) {
-            if(brick!=null && bombRange!=null && bombRange.containBrick(brick)){
-                brick.setInVisible();
-                points += 10;
-                if (!(brick instanceof Wall)) {
-                brokenBricks++;
-                }
-            }
             if (brick != null && (lastVisitedBrick != brick) && brick.collision(ballX, ballX + ballWidth, ballY, ballY + ballHeight)) {
                 if (mpBreak != null) {
                     lastVisitedBrick = brick;
@@ -226,11 +219,6 @@ public class GameView extends View  {
                     mpBreak.start();
                     velocity = brick.velocityAfterCollision(velocity, ballX + ballWidth/2, ballY + ballHeight/2);
                     if (setBomb){
-                        brick.setInVisible();
-                        points += 10;
-                        if (!(brick instanceof Wall)){
-                            brokenBricks++;
-                        }
                         setBomb=false;
                         bombRange = new BombRange(brick.left-dWidth/8, brick.right+dWidth/8, brick.top-dHeight/16, brick.bottom+dHeight/16);
                     }
@@ -246,8 +234,16 @@ public class GameView extends View  {
                 }
             }
         }
+        for (Brick brick : bricks){
+            if (brick!=null && bombRange!=null && brick.getVisibility() && bombRange.containBrick(brick)){
+                brick.setInVisible();
+                points += 10;
+                if (!(brick instanceof Wall)) {
+                    brokenBricks++;
+                }
+            }
+        }
         bombRange=null;
-
 
         if (brokenBricks == numBricks) {
             // All blocks are eliminated

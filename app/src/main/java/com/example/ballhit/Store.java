@@ -70,7 +70,7 @@ public class Store extends AppCompatActivity {
     private void initGoods(){
         Goods lifePlus=new Goods("life +1","$50",R.drawable.life_plus);
         Goods timePlus=new Goods("time +10s","$30",R.drawable.time_plus);
-        Goods bomb=new Goods("eliminate the collided brick and the bricks around it", "$50", R.drawable.bomb);
+        Goods bomb=new Goods("eliminate the collided brick and the bricks around it including walls", "$50", R.drawable.bomb);
         goodsList.add(lifePlus);
         goodsList.add(timePlus);
         goodsList.add(bomb);

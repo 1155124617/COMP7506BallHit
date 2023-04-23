@@ -156,8 +156,6 @@ public class GameView extends View  {
         super.onDraw(canvas);
         canvas.drawColor(Color.BLACK);
 
-        setBomb = true;
-
         if (countDownTimer.remainingTime == 0) {
             // Time is up
             gameOver = true;

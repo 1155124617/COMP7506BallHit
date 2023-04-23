@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                                 SharedPreferences.Editor editor = preferences.edit();
                                 editor.putString("username", name);
                                 editor.apply();
-                                Toast.makeText(MainActivity.this, "WELCOME TO BALL HIT！", Toast.LENGTH_LONG).show();
+                                // Toast.makeText(MainActivity.this, "WELCOME TO BALL HIT！", Toast.LENGTH_LONG).show();
                                 //成功登陆，进入LoginokActivity界面
                                 Intent intent=new Intent(MainActivity.this,LoginokActivity.class);
                                 intent.putExtra("username", name); // Pass the user name to the next activity

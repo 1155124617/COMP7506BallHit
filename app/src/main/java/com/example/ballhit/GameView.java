@@ -251,8 +251,6 @@ public class GameView extends View  {
         }
         bombRange = null;
 
-        cleanAll();
-
         if (!gameOver && !stopGame) {
             delayedThreadExec.postDelayed(refreshThread, UPDATE_MILLIS);
         }
@@ -263,7 +261,7 @@ public class GameView extends View  {
             // All blocks are eliminated
             gameOver = true;
             points += 100;
-            Toast toast=Toast.makeText(context, "Congratulations! \nYou have cleaned all bricks.\npoints +100", Toast.LENGTH_LONG);
+            Toast toast=Toast.makeText(context, "You have cleaned all bricks.\npoints +100", Toast.LENGTH_SHORT);
 //            ImageView myImage = new ImageView(context);
 //            myImage.setImageResource(R.drawable.congratulation);
 //            LinearLayout toastView = (LinearLayout)toast.getView();

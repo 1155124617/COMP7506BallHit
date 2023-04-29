@@ -179,7 +179,7 @@ public class GameView extends View  {
             // Fix the bug that the ball bounces within paddle boundary
             if (((ballX + ball.getWidth()) >= paddleX)
                     && (ballX <= paddleX + paddle.getWidth())
-                    && (ballY + ball.getHeight() >= paddleY)
+                    && (ballY + ball.getHeight() >= paddleY + 70)  // Distance diff between visual effect and the actual height
                     && (ballY + ball.getHeight() <= paddleY + paddle.getHeight())) {
                 if (mpHit != null) {
                     mpHit.start();
@@ -224,12 +224,12 @@ public class GameView extends View  {
                         setBomb=false;
                         bombRange = new BombRange(brick.left-dWidth/8, brick.right+dWidth/8, brick.top-dHeight/16, brick.bottom+dHeight/16);
                     }
-                    if (!(brick instanceof Wall)) {
+                    else if (!(brick instanceof Wall)) {
                         brick.setInVisible();
                         points += 10;
                         brokenBricks++;
                     }
-                    if (brokenBricks == 24) {
+                    if (bombRange == null && cleanAll()) {
                         endTurn();
                     }
                     break;
@@ -244,14 +244,24 @@ public class GameView extends View  {
                     brokenBricks++;
                 }
             }
+            if (bombRange != null && cleanAll()) {
+                endTurn();
+                break;
+            }
         }
-        bombRange=null;
+        bombRange = null;
 
+        if (!gameOver && !stopGame) {
+            delayedThreadExec.postDelayed(refreshThread, UPDATE_MILLIS);
+        }
+    }
+
+    private boolean cleanAll() {
         if (brokenBricks == numBricks) {
             // All blocks are eliminated
             gameOver = true;
-            points+=100;
-            Toast toast=Toast.makeText(context, "Congratulations! \nYou have cleaned all bricks.\npoints +100", Toast.LENGTH_LONG);
+            points += 100;
+            Toast toast=Toast.makeText(context, "You have cleaned all bricks.\npoints +100", Toast.LENGTH_SHORT);
 //            ImageView myImage = new ImageView(context);
 //            myImage.setImageResource(R.drawable.congratulation);
 //            LinearLayout toastView = (LinearLayout)toast.getView();
@@ -259,11 +269,9 @@ public class GameView extends View  {
 //            toastView.addView(myImage,0);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
+            return true;
         }
-
-        if (!gameOver && !stopGame) {
-            delayedThreadExec.postDelayed(refreshThread, UPDATE_MILLIS);
-        }
+        return false;
     }
 
     private void interactBorder() {
@@ -333,7 +341,7 @@ public class GameView extends View  {
             intent.putExtra("bomb", bomb);
             context.startActivity(intent);
             ((Activity)context).finish();
-        }else{
+        } else{
             launchGameOver();
         }
     }
